@@ -270,7 +270,7 @@ const socketMain = async (io: any) => {
     const { id, token, userName, workspace } = {
       id: "2345ghjjk",
       token: "23jrtiheriufyqwidsf",
-      userName: "Ghassan",
+      userName: "@wds-ui",
       workspace: "dci",
     };
     let statusOnline = "online";
