@@ -1,0 +1,73 @@
+version: "3.8"
+services:
+  codeeeeee-api:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ../../../../workspace-backend-image
+    container_name: codeeeeee-api
+    volumes:
+      - ../../../../workspace-backend-image:/app
+      - /app/node_modules
+      - /Users/ghassanaldarwish/Desktop/wds/infrastructure/file-system/workspaces/codeeeeee:/app/files
+
+    environment:
+      - PORT=4444
+      - ORIGIN=http://localhost:8888
+      - NODE_ENV=development
+      - DB_NAME=codeeeeee
+      - ROLE=admin
+      - CACHE_HOST=codeeeeee-cache
+      - SERVICE_NAME=codeeeeee
+      - DB_URI=mongodb://droplet-db-production
+      - KAFKA_BROKER_LISTENER=kafka:9092
+      - JWT_SECRET=JWT_ACCESS_SECRET
+      - JWT_SECRET_SOCKET=JWT_SECRET_SOCKET
+      - HOST=localhost
+    restart: on-failure
+    labels:
+      - "traefik.http.routers.codeeeeee-api.rule=Host(`workspace-api.localhost`) && PathPrefix(`/codeeeeee`)"
+      - "traefik.http.routers.codeeeeee-api.middlewares=codeeeeee-api-stripprefix"
+      - "traefik.http.middlewares.codeeeeee-api-stripprefix.stripprefix.prefixes=/codeeeeee"
+
+    networks:
+      - app-workspace-network
+
+  codeeeeee-vscode:
+    image: "lscr.io/linuxserver/code-server:latest"
+
+    #build:
+    #context: ./
+    #dockerfile: Dockerfile
+    container_name: codeeeeee-vscode
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SUDO_PASSWORD=pass
+    labels:
+      - "traefik.http.routers.codeeeeee-vscode.rule=Host(`vscode.localhost`) && PathPrefix(`/codeeeeee`)"
+      - "traefik.http.routers.codeeeeee-vscode.middlewares=codeeeeee-vscode-stripprefix,codeeeeee-vscode-basicauth"
+      - "traefik.http.middlewares.codeeeeee-vscode-stripprefix.stripprefix.prefixes=/codeeeeee"
+      - "traefik.http.middlewares.codeeeeee-vscode-basicauth.basicauth.users=codeeeeee:$2y$05$6gZFqGz8vqs4Tjk0eCm2/.6/CSEv52oHd5F3HfrovFdmIn7FHLYre$"
+
+    restart: unless-stopped
+    volumes:
+      - /Users/ghassanaldarwish/Desktop/wds/infrastructure/file-system/workspaces/codeeeeee/vscode:/config
+    networks:
+      - app-workspace-network
+
+  codeeeeee-cache:
+    image: redis:6.2-alpine
+    restart: always
+    volumes:
+      - cache-codeeeeee:/data
+    networks:
+      - app-workspace-network
+
+networks:
+  app-workspace-network:
+    name: app-workspace-network
+
+volumes:
+  cache-codeeeeee:
+    driver: local

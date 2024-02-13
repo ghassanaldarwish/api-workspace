@@ -1,0 +1,30 @@
+# node_modules
+node_modules
+
+# .DS_Store
+*.DS_Store
+
+# .next
+.next
+
+build
+
+# helm
+helm
+
+# Other
+.gitignore
+README.md
+.dockerignore
+LICENSE
+.docker
+.gitlab
+.git
+
+.env
+
+
+public
+lessons
+
+logs
